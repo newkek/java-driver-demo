@@ -13,18 +13,28 @@ import java.util.stream.Collectors;
 import static com.datastax.demo.ProductRange.productsCreatedBetween;
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.*;
 
-public class QueryBuilderDemo {
+public class QueryBuilderMain {
 
-    private QueryBuilderDemo() {
+    private QueryBuilderMain() {
     }
 
     public static void main(String[] args) {
-        QueryBuilderDemo demo = new QueryBuilderDemo();
+        QueryBuilderMain demo = new QueryBuilderMain();
         demo.start();
     }
 
+    public void init(CqlSession session) {
+        session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
+        session.execute("DROP TABLE IF EXISTS meetup_demo.product");
+        session.execute("CREATE TABLE meetup_demo.product (id int, produced date, name text, description text, primary key (id, produced))");
+    }
+
     public void start() {
+
         try (CqlSession session = CqlSession.builder().withKeyspace("meetup_demo").build()) {
+            init(session);
+
+
 
             addData(session);
 

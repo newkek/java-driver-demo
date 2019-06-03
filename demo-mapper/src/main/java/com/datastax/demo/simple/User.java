@@ -14,8 +14,7 @@ public class User {
 
     public String email;
 
-    public User() {
-    }
+    public User() {}
 
     public User(int id, String name, String email) {
         this.id = id;
