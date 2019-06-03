@@ -2,11 +2,9 @@ package com.datastax.demo.simple;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 
-public class MapperMain
-{
+public class MapperMain {
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         MapperMain mapperMain = new MapperMain();
         mapperMain.start();
     }
