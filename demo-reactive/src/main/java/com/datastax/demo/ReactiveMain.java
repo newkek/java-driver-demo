@@ -66,7 +66,7 @@ public class ReactiveMain {
 
                 // insert into Usage table a new entry of a usage
                 .flatMap(pair -> session.executeReactive(
-                        SimpleStatement.newInstance("INSERT INTO playtime(time, productName, userId) VALUES (?, ?, ?)",
+                        SimpleStatement.newInstance("INSERT INTO playtime(time, productName, userId) VALUES (?, ?, ?) IF NOT EXISTS",
                                 Instant.ofEpochMilli(pair.getValue0().timestamp()),
                                 pair.getValue1().getString("name"),
                                 pair.getValue0().key()
@@ -74,7 +74,10 @@ public class ReactiveMain {
                 )
 
                 .subscribe(
-                        success -> latch.countDown(),
+                        success -> {
+                            latch.countDown();
+                            System.out.println("Successfully created record");
+                        },
                         error -> {
                             latch.countDown();
                             System.out.println("Error in flow:");

@@ -5,6 +5,7 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import com.datastax.oss.driver.api.querybuilder.insert.Insert;
 import com.datastax.oss.driver.api.querybuilder.select.Select;
+import com.datastax.oss.driver.shaded.guava.common.collect.ImmutableList;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,14 +17,6 @@ import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.*;
 public class QueryBuilderMain {
 
     private QueryBuilderMain() {
-    }
-
-    public void init() {
-        try (CqlSession session = CqlSession.builder().build()){
-            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-            session.execute("DROP TABLE IF EXISTS meetup_demo.product");
-            session.execute("CREATE TABLE meetup_demo.product (id int, produced date, name text, description text, primary key (id, produced))");
-        }
     }
 
     public static void main(String[] args) {
@@ -42,7 +35,11 @@ public class QueryBuilderMain {
 
 
             List<Row> rows = session.execute(queryExample1()).all();
-            System.out.println("only 1 product = " + rows.stream().map(r -> r.getString("name")).collect(Collectors.toList()));
+            System.out.println("only 1 product = " + rows.stream().map(row -> ImmutableList.of(
+                    row.getInt("id"),
+                    row.getLocalDate("produced"),
+                    row.getString("name"),
+                    row.getString("description"))).collect(Collectors.toList()));
 
 
 
@@ -54,6 +51,14 @@ public class QueryBuilderMain {
 
             rows = session.execute(queryExample3()).all();
             System.out.println("range products = " + rows.stream().map(r -> r.getString("name")).collect(Collectors.toList()));
+        }
+    }
+
+    public void init() {
+        try (CqlSession session = CqlSession.builder().build()){
+            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
+            session.execute("DROP TABLE IF EXISTS meetup_demo.product");
+            session.execute("CREATE TABLE meetup_demo.product (id int, produced date, name text, description text, primary key (id, produced))");
         }
     }
 
@@ -159,7 +164,8 @@ public class QueryBuilderMain {
     }
 
     public Statement queryExample3() {
-        return getAllProducts().where(productsCreatedBetween(1, LocalDate.of(1993, 2, 21), LocalDate.of(1993, 2, 22)))
+        return getAllProducts()
+                .where(productsCreatedBetween(1, LocalDate.of(1993, 2, 21), LocalDate.of(1993, 2, 22)))
                 .build();
     }
 
@@ -173,9 +179,9 @@ public class QueryBuilderMain {
     public static Select getOnlyProduct(int id, LocalDate date) {
         return getAllProducts()
                 .whereColumn("id")
-                .isEqualTo(literal(id))
+                    .isEqualTo(literal(id))
                 .whereColumn("produced")
-                .isEqualTo(literal(date));
+                    .isEqualTo(literal(date));
     }
 
     public static Select getOnlyProductColumns(int id, LocalDate date, String... columns) {

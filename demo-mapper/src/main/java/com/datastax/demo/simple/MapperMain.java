@@ -9,16 +9,6 @@ public class MapperMain {
         mapperMain.start();
     }
 
-    private MapperMain() {}
-
-    public void init() {
-        try (CqlSession session = CqlSession.builder().build()) {
-            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-            session.execute("DROP TABLE IF EXISTS meetup_demo.user");
-            session.execute("CREATE TABLE meetup_demo.user (id int primary key, name text, email text)");
-        }
-    }
-
     public void start() {
 
         // 1. check out User.java
@@ -37,6 +27,16 @@ public class MapperMain {
             dao.addUser(new User(2, "bonnie", "the-email2@email.email"));
 
             System.out.println("user = " + dao.getUser(1));
+        }
+    }
+
+    private MapperMain() {}
+
+    public void init() {
+        try (CqlSession session = CqlSession.builder().build()) {
+            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
+            session.execute("DROP TABLE IF EXISTS meetup_demo.user");
+            session.execute("CREATE TABLE meetup_demo.user (id int primary key, name text, email text)");
         }
     }
 }
