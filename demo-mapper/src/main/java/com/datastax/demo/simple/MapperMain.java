@@ -11,10 +11,12 @@ public class MapperMain {
 
     private MapperMain() {}
 
-    public void init(CqlSession session) {
-        session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-        session.execute("DROP TABLE IF EXISTS meetup_demo.user");
-        session.execute("CREATE TABLE meetup_demo.user (id int primary key, name text, email text)");
+    public void init() {
+        try (CqlSession session = CqlSession.builder().build()) {
+            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
+            session.execute("DROP TABLE IF EXISTS meetup_demo.user");
+            session.execute("CREATE TABLE meetup_demo.user (id int primary key, name text, email text)");
+        }
     }
 
     public void start() {
@@ -24,14 +26,15 @@ public class MapperMain {
         // 3. check out DemoMapper.java
         // 4. this
 
+        init();
         try (CqlSession session = CqlSession.builder().withKeyspace("meetup_demo").build()) {
-            init(session);
 
             DemoMapper demoMapper = new DemoMapperBuilder(session).build();
 
             UserDao dao = demoMapper.userDao();
 
-            dao.addUser(new User(1, "marko", "the-email@email.email"));
+            dao.addUser(new User(1, "andy", "the-email@email.email"));
+            dao.addUser(new User(2, "bonnie", "the-email2@email.email"));
 
             System.out.println("user = " + dao.getUser(1));
         }

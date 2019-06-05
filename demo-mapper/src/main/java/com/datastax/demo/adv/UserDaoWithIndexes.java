@@ -17,6 +17,6 @@ public interface UserDaoWithIndexes {
     @Select(customWhereClause = "name = :name")
     User getUserByNameWithSI(String name);
 
-    @Select(customWhereClause = "email = :email")
-    User getUserByEmailWithMV(String email);
+//    @Select(customWhereClause = "email = :email")
+//    User getUserByEmailWithMV(String email);
 }

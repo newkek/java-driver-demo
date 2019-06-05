@@ -27,26 +27,29 @@ public class ReactiveMain {
 
     private final ReceiverOptions<Integer, Integer> receiverOptions;
 
-    private final DseSession session;
+    public static void main(String[] args) {
+        ReactiveMain demo = new ReactiveMain(BOOTSTRAP_SERVERS);
+        demo.start();
+    }
 
-
-    public static void main(String[] args) throws Exception {
+    private void start() {
         int count = 20;
         CountDownLatch latch = new CountDownLatch(count);
 
         try (DseSession session = DseSession.builder().withKeyspace("meetup_demo").build()) {
+            init(session);
 
-
-            ReactiveMain consumer = new ReactiveMain(BOOTSTRAP_SERVERS, session);
-            Disposable disposable = consumer.setupConsumerPipeline(TOPIC, latch);
-
-
-            latch.await(20, TimeUnit.MINUTES);
+            Disposable disposable = setupConsumerPipeline(TOPIC, latch, session);
+            try {
+                latch.await(20, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted or has listened for its time.");
+            }
             disposable.dispose();
         }
     }
 
-    public Disposable setupConsumerPipeline(String topic, CountDownLatch latch) {
+    public Disposable setupConsumerPipeline(String topic, CountDownLatch latch, DseSession session) {
         ReceiverOptions<Integer, Integer> options = receiverOptions.subscription(Collections.singleton(topic));
         Flux<ReceiverRecord<Integer, Integer>> kafkaFlux = KafkaReceiver.create(options).receive();
 
@@ -63,18 +66,28 @@ public class ReactiveMain {
 
                 // insert into Usage table a new entry of a usage
                 .flatMap(pair -> session.executeReactive(
-                        SimpleStatement.newInstance("INSERT INTO usage(time, userId, productName) VALUES (?, ?, ?)",
-                                pair.getValue0().key(),
+                        SimpleStatement.newInstance("INSERT INTO playtime(time, productName, userId) VALUES (?, ?, ?)",
+                                Instant.ofEpochMilli(pair.getValue0().timestamp()),
                                 pair.getValue1().getString("name"),
-                                Instant.ofEpochMilli(pair.getValue0().timestamp())))
+                                pair.getValue0().key()
+                        ))
                 )
 
-                .subscribe(success -> latch.countDown(), error -> latch.countDown());
+                .subscribe(
+                        success -> latch.countDown(),
+                        error -> {
+                            latch.countDown();
+                            System.out.println("Error in flow:");
+                            error.printStackTrace();
+                        });
     }
 
-    public ReactiveMain(String bootstrapServers, DseSession session) {
-        this.session = session;
+    public ReactiveMain(String bootstrapServers) {
         this.receiverOptions = initKafkaOptions(bootstrapServers);
+    }
+
+    private void init(DseSession session) {
+        session.execute("CREATE TABLE IF NOT EXISTS meetup_demo.playtime(time timestamp, userId int, productName text, PRIMARY KEY ((time), productName))");
     }
 
     private static final Consumer<ReceiverRecord<Integer, Integer>> messageReceivedHandler = record -> {

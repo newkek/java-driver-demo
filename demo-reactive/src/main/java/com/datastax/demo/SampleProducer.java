@@ -34,9 +34,13 @@ public class SampleProducer {
         CountDownLatch latch = new CountDownLatch(1);
         SampleProducer producer = new SampleProducer(BOOTSTRAP_SERVERS);
 
-        producer.sendMessages(TOPIC, latch, 1, 1); // product id 1 is the roundup gang
-//        producer.sendMessages(TOPIC, latch, 1, 2); // product id 2 is buzz
-//        producer.sendMessages(TOPIC, latch, 1, 3); // product id 3 is slinky
+        producer.sendMessages(TOPIC, latch, 1, 1); // andy plays with the roundup gang
+//        producer.sendMessages(TOPIC, latch, 1, 2); // andy plays with buzz
+//        producer.sendMessages(TOPIC, latch, 1, 3); // andy plays with slinky
+
+//        producer.sendMessages(TOPIC, latch, 2, 1); // bonnie plays with the roundup gang
+//        producer.sendMessages(TOPIC, latch, 2, 2); // bonnie plays with buzz
+//        producer.sendMessages(TOPIC, latch, 2, 3); // bonnie plays with slinky
 
         latch.await(10, TimeUnit.SECONDS);
         producer.close();

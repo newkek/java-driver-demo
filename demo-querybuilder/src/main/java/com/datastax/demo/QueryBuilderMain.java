@@ -18,22 +18,23 @@ public class QueryBuilderMain {
     private QueryBuilderMain() {
     }
 
+    public void init() {
+        try (CqlSession session = CqlSession.builder().build()){
+            session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
+            session.execute("DROP TABLE IF EXISTS meetup_demo.product");
+            session.execute("CREATE TABLE meetup_demo.product (id int, produced date, name text, description text, primary key (id, produced))");
+        }
+    }
+
     public static void main(String[] args) {
         QueryBuilderMain demo = new QueryBuilderMain();
         demo.start();
     }
 
-    public void init(CqlSession session) {
-        session.execute("CREATE KEYSPACE IF NOT EXISTS meetup_demo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-        session.execute("DROP TABLE IF EXISTS meetup_demo.product");
-        session.execute("CREATE TABLE meetup_demo.product (id int, produced date, name text, description text, primary key (id, produced))");
-    }
-
     public void start() {
 
+        init();
         try (CqlSession session = CqlSession.builder().withKeyspace("meetup_demo").build()) {
-            init(session);
-
 
 
             addData(session);
@@ -55,6 +56,33 @@ public class QueryBuilderMain {
             System.out.println("range products = " + rows.stream().map(r -> r.getString("name")).collect(Collectors.toList()));
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -87,6 +115,28 @@ public class QueryBuilderMain {
                 .value("name", literal(name))
                 .value("description", literal(description));
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
