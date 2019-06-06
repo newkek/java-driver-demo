@@ -10,6 +10,14 @@ It is separated in the following sub projects:
 
 ## Run it
 
+Important: the java driver's new object mapper has not been released yet and is still in development. So to be able to use the mapper demo requires building and installing locally the DataStax Apache Cassandra driver from the branch `java2078`:
+
+```
+> git clone https://github.com/datastax/java-driver.git
+> git checkout java2078
+> mvn clean install -DskipTests
+```
+
 All the examples require that a local Apache Cassandra or a local DataStax Enterprise node be running.
 
 The demo's modules have main methods and are supposed to be run in a certain order for everything to work:
