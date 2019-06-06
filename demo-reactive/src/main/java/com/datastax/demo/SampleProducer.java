@@ -19,6 +19,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * Simple producer of new values adding to the Kafka stream.
+ */
 public class SampleProducer {
 
     static final String BOOTSTRAP_SERVERS = "localhost:9092";

@@ -23,6 +23,9 @@ import java.util.function.Consumer;
 
 import static com.datastax.demo.SampleProducer.*;
 
+/**
+ * Consumer of Kafka stream events with Reactive Streams workflow.
+ */
 public class ReactiveMain {
 
     private final ReceiverOptions<Integer, Integer> receiverOptions;
@@ -34,6 +37,7 @@ public class ReactiveMain {
 
     private void start() {
         int count = 20;
+        // decide to quit the consumer once 20 messages were consumed from the kafka topic
         CountDownLatch latch = new CountDownLatch(count);
 
         try (DseSession session = DseSession.builder().withKeyspace("meetup_demo").build()) {
@@ -64,7 +68,7 @@ public class ReactiveMain {
                         .map(row -> Pair.with(record, row))
                 )
 
-                // insert into Usage table a new entry of a usage
+                // insert into Usage table a new entry of a usage for each product used
                 .flatMap(pair -> session.executeReactive(
                         SimpleStatement.newInstance("INSERT INTO playtime(time, productName, userId) VALUES (?, ?, ?) IF NOT EXISTS",
                                 Instant.ofEpochMilli(pair.getValue0().timestamp()),

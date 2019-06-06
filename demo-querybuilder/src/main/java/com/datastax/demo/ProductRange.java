@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
 import static com.datastax.oss.driver.api.querybuilder.relation.Relation.column;
 
+/**
+ * Example implementation of DSL operation in the Query builder
+ */
 public class ProductRange implements Relation {
 
     private final int id;
