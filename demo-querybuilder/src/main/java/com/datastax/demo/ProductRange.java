@@ -29,7 +29,7 @@ public class ProductRange implements Relation {
 
     @Override
     public boolean isIdempotent() {
-        return false;
+        return true;
     }
 
     @Override
